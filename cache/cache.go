@@ -145,6 +145,8 @@ func AfterQuery(cache *ChCache) func(db *gorm.DB) {
 			fmt.Println(s)
 			return
 		}
+
+		s = fmt.Sprintf("chcache[AfterQuery] sql %s cached", sql)
 		fmt.Println(s)
 	}
 }

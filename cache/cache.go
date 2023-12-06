@@ -2,14 +2,18 @@ package cache
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
+	"gorm.io/gorm/callbacks"
 )
 
 type ChCache struct {
@@ -54,13 +58,53 @@ func (c *ChCache) Initialize(db *gorm.DB) (err error) {
 	fmt.Println("ChCache Initialize")
 	return
 }
-func BeforeQuery(c *ChCache) func(db *gorm.DB) {
+func BeforeQuery(cache *ChCache) func(db *gorm.DB) {
 	return func(db *gorm.DB) {
+		callbacks.BuildQuerySQL(db)
+		tableName := ""
+		if db.Statement.Schema != nil {
+			tableName = db.Statement.Schema.Table
+		} else {
+			tableName = db.Statement.Table
+		}
+		ctx := db.Statement.Context
+
 		sql := db.Statement.SQL.String()
 		db.InstanceSet("gorm:chcache:sql", sql)
 		db.InstanceSet("gorm:chcache:vars", db.Statement.Vars)
 		fmt.Println("ChCache BeforeQuery")
-		db.Error = nil
+
+		cacheValue, err := cache.GetSearchCache(ctx, tableName, sql, db.Statement.Vars...)
+		if err != nil {
+			if !errors.Is(err, redis.Nil) {
+				s := fmt.Sprintf("chcache[BeforeQuery] get cache value for sql %s error: %v", sql, err)
+				fmt.Println(s)
+			}
+			db.Error = nil
+			return
+		}
+
+		s := fmt.Sprintf("chcache[BeforeQuery] get value: %s", cacheValue)
+		fmt.Println(s)
+		rowsAffectedPos := strings.Index(cacheValue, "|")
+		db.RowsAffected, err = strconv.ParseInt(cacheValue[:rowsAffectedPos], 10, 64)
+		if err != nil {
+
+			s := fmt.Sprintf("chcache[BeforeQuery] unmarshal rows affected cache error: %v", err)
+			fmt.Println(s)
+			db.Error = nil
+			return
+		}
+		err = json.Unmarshal([]byte(cacheValue[rowsAffectedPos+1:]), db.Statement.Dest)
+		if err != nil {
+			s := fmt.Sprintf("chcache[BeforeQuery] unmarshal search cache error: %v", err)
+			fmt.Println(s)
+			db.Error = nil
+			return
+		}
+
+		db.Error = errors.New("search cache hit")
+
 		return
 	}
 }
@@ -74,9 +118,33 @@ type RedisLayer struct {
 	cleanCacheSha string
 }
 
-func AfterQuery(c *ChCache) func(db *gorm.DB) {
+func AfterQuery(cache *ChCache) func(db *gorm.DB) {
 	return func(db *gorm.DB) {
 		s, _ := db.InstanceGet("gorm:chcache:sql")
+		tableName := ""
+		if db.Statement.Schema != nil {
+			tableName = db.Statement.Schema.Table
+		} else {
+			tableName = db.Statement.Table
+		}
+		ctx := db.Statement.Context
+		sqlObj, _ := db.InstanceGet("gorm:chcache:sql")
+		sql := sqlObj.(string)
+		varObj, _ := db.InstanceGet("gorm:chcache:vars")
+		vars := varObj.([]interface{})
+
+		cacheBytes, err := json.Marshal(db.Statement.Dest)
+		if err != nil {
+			s := fmt.Sprintf("chcache[AfterQuery] cannot marshal cache for sql: %s, not cached", sql)
+			fmt.Println(s)
+			return
+		}
+		err = cache.SetSearchCache(ctx, fmt.Sprintf("%d|", db.RowsAffected)+string(cacheBytes), tableName, sql, vars...)
+		if err != nil {
+			s := fmt.Sprintf("chcache[AfterQuery] set search cache for sql: %s error: %v", sql, err)
+			fmt.Println(s)
+			return
+		}
 		fmt.Println(s)
 	}
 }
@@ -137,4 +205,8 @@ func (r *RedisLayer) Init(prefix string) error {
 
 	r.keyPrefix = prefix
 	return nil
+}
+func (c *ChCache) GetSearchCache(ctx context.Context, tableName string, sql string, vars ...interface{}) (string, error) {
+	key := GenSearchCacheKey(c.InstanceId, tableName, sql, vars...)
+	return c.cache.GetValue(ctx, key)
 }

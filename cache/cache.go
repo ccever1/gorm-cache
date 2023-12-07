@@ -16,6 +16,8 @@ import (
 	"gorm.io/gorm/callbacks"
 )
 
+var SearchCacheHit = errors.New("search cache hit1")
+
 type ChCache struct {
 	InstanceId string
 	cache      DataLayerInterface
@@ -103,7 +105,7 @@ func BeforeQuery(cache *ChCache) func(db *gorm.DB) {
 			return
 		}
 
-		db.Error = errors.New("search cache hit1")
+		db.Error = SearchCacheHit
 
 		return
 	}
@@ -152,7 +154,7 @@ func AfterQuery(cache *ChCache) func(db *gorm.DB) {
 
 			return
 		}
-		if errors.Is(db.Error, errors.New("search cache hit1")) {
+		if errors.Is(db.Error, SearchCacheHit) {
 			// search cache hit
 			db.Error = nil
 			return

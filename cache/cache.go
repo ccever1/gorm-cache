@@ -103,7 +103,7 @@ func BeforeQuery(cache *ChCache) func(db *gorm.DB) {
 			return
 		}
 
-		db.Error = errors.New("search cache hit")
+		db.Error = errors.New("search cache hit1")
 
 		return
 	}
@@ -150,7 +150,7 @@ func AfterQuery(cache *ChCache) func(db *gorm.DB) {
 			s = fmt.Sprintf("chcache[AfterQuery] sql %s cached", sql)
 			fmt.Println(s)
 		}
-		if errors.Is(db.Error, errors.New("search cache hit")) {
+		if errors.Is(db.Error, errors.New("search cache hit2")) {
 			// search cache hit
 			db.Error = nil
 			return

@@ -33,15 +33,15 @@ func GenInstanceId() string {
 	}
 	return string(str)
 }
-func (c *ChCache) Init() error {
+func (c *ChCache) Init(addr string) error {
 	c.InstanceId = GenInstanceId()
 	c.cache = &RedisLayer{}
-	c.cache.Init("chcache")
+	c.cache.Init("chcache", addr)
 	return nil
 }
-func NewChCache() (*ChCache, error) {
+func NewChCache(addr string) (*ChCache, error) {
 	cache := &ChCache{}
-	err := cache.Init()
+	err := cache.Init(addr)
 	return cache, err
 }
 
@@ -201,7 +201,7 @@ type Kv struct {
 }
 
 type DataLayerInterface interface {
-	Init(prefix string) error
+	Init(prefix string, addr string) error
 	// read
 
 	GetValue(ctx context.Context, key string) (string, error)
@@ -221,8 +221,8 @@ func RandFloatingInt64(v int64) int64 {
 func (r *RedisLayer) GetValue(ctx context.Context, key string) (string, error) {
 	return r.client.Get(ctx, key).Result()
 }
-func (r *RedisLayer) Init(prefix string) error {
-	opt := &redis.Options{Addr: "localhost:6379"}
+func (r *RedisLayer) Init(prefix string, addr string) error {
+	opt := &redis.Options{Addr: addr}
 	r.client = redis.NewClient(opt)
 
 	r.ttl = 5000

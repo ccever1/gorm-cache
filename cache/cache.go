@@ -57,7 +57,7 @@ func (c *ChCache) Initialize(db *gorm.DB) (err error) {
 	if err != nil {
 		return err
 	}
-	fmt.Println("ChCache Initialize")
+	//fmt.Println("ChCache Initialize")
 	return
 }
 func BeforeQuery(cache *ChCache) func(db *gorm.DB) {
@@ -80,33 +80,33 @@ func BeforeQuery(cache *ChCache) func(db *gorm.DB) {
 		sql := db.Statement.SQL.String()
 		db.InstanceSet("gorm:chcache:sql", sql)
 		db.InstanceSet("gorm:chcache:vars", db.Statement.Vars)
-		fmt.Println("ChCache BeforeQuery")
+		//fmt.Println("ChCache BeforeQuery")
 
 		cacheValue, err := cache.GetSearchCache(ctx, tableName, sql, db.Statement.Vars...)
 		if err != nil {
 			if !errors.Is(err, redis.Nil) {
-				s := fmt.Sprintf("chcache[BeforeQuery] get cache value for sql %s error: %v", sql, err)
-				fmt.Println(s)
+				// s := fmt.Sprintf("chcache[BeforeQuery] get cache value for sql %s error: %v", sql, err)
+				//fmt.Println(s)
 			}
 			db.Error = nil
 			return
 		}
 
-		s := fmt.Sprintf("chcache[BeforeQuery] get value: %s", cacheValue)
-		fmt.Println(s)
+		// s := fmt.Sprintf("chcache[BeforeQuery] get value: %s", cacheValue)
+		//fmt.Println(s)
 		rowsAffectedPos := strings.Index(cacheValue, "|")
 		db.RowsAffected, err = strconv.ParseInt(cacheValue[:rowsAffectedPos], 10, 64)
 		if err != nil {
 
-			s := fmt.Sprintf("chcache[BeforeQuery] unmarshal rows affected cache error: %v", err)
-			fmt.Println(s)
+			// s := fmt.Sprintf("chcache[BeforeQuery] unmarshal rows affected cache error: %v", err)
+			//fmt.Println(s)
 			db.Error = nil
 			return
 		}
 		err = json.Unmarshal([]byte(cacheValue[rowsAffectedPos+1:]), db.Statement.Dest)
 		if err != nil {
-			s := fmt.Sprintf("chcache[BeforeQuery] unmarshal search cache error: %v", err)
-			fmt.Println(s)
+			// s := fmt.Sprintf("chcache[BeforeQuery] unmarshal search cache error: %v", err)
+			//fmt.Println(s)
 			db.Error = nil
 			return
 		}
@@ -133,7 +133,7 @@ func AfterQuery(cache *ChCache) func(db *gorm.DB) {
 			db.Error = nil
 			return
 		}
-		s, _ := db.InstanceGet("gorm:chcache:sql")
+		// s, _ := db.InstanceGet("gorm:chcache:sql")
 		tableName := ""
 		if db.Statement.Schema != nil {
 			tableName = db.Statement.Schema.Table
@@ -149,19 +149,19 @@ func AfterQuery(cache *ChCache) func(db *gorm.DB) {
 
 			cacheBytes, err := json.Marshal(db.Statement.Dest)
 			if err != nil {
-				s := fmt.Sprintf("chcache[AfterQuery] cannot marshal cache for sql: %s, not cached", sql)
-				fmt.Println(s)
+				// s := fmt.Sprintf("chcache[AfterQuery] cannot marshal cache for sql: %s, not cached", sql)
+				//fmt.Println(s)
 				return
 			}
 			err = cache.SetSearchCache(ctx, fmt.Sprintf("%d|", db.RowsAffected)+string(cacheBytes), tableName, sql, vars...)
 			if err != nil {
-				s := fmt.Sprintf("chcache[AfterQuery] set search cache for sql: %s error: %v", sql, err)
-				fmt.Println(s)
+				// s := fmt.Sprintf("chcache[AfterQuery] set search cache for sql: %s error: %v", sql, err)
+				//fmt.Println(s)
 				return
 			}
 
-			s = fmt.Sprintf("chcache[AfterQuery] sql %s cached", sql)
-			fmt.Println(s)
+			// s = fmt.Sprintf("chcache[AfterQuery] sql %s cached", sql)
+			//fmt.Println(s)
 
 			return
 		}

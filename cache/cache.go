@@ -225,7 +225,7 @@ func (r *RedisLayer) Init(prefix string) error {
 	opt := &redis.Options{Addr: "localhost:6379"}
 	r.client = redis.NewClient(opt)
 
-	r.ttl = 50000
+	r.ttl = 5000
 
 	r.keyPrefix = prefix
 	return nil

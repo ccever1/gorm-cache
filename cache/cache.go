@@ -62,6 +62,12 @@ func (c *ChCache) Initialize(db *gorm.DB) (err error) {
 }
 func BeforeQuery(cache *ChCache) func(db *gorm.DB) {
 	return func(db *gorm.DB) {
+
+		isC, ok := db.InstanceGet("gorm:chcache:iscache")
+		if !ok || !isC.(bool) {
+			db.Error = nil
+			return
+		}
 		callbacks.BuildQuerySQL(db)
 		tableName := ""
 		if db.Statement.Schema != nil {
@@ -122,6 +128,11 @@ type RedisLayer struct {
 
 func AfterQuery(cache *ChCache) func(db *gorm.DB) {
 	return func(db *gorm.DB) {
+		isC, ok := db.InstanceGet("gorm:chcache:iscache")
+		if !ok || !isC.(bool) {
+			db.Error = nil
+			return
+		}
 		s, _ := db.InstanceGet("gorm:chcache:sql")
 		tableName := ""
 		if db.Statement.Schema != nil {

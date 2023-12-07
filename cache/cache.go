@@ -132,22 +132,29 @@ func AfterQuery(cache *ChCache) func(db *gorm.DB) {
 		sql := sqlObj.(string)
 		varObj, _ := db.InstanceGet("gorm:chcache:vars")
 		vars := varObj.([]interface{})
+		if db.Error == nil {
 
-		cacheBytes, err := json.Marshal(db.Statement.Dest)
-		if err != nil {
-			s := fmt.Sprintf("chcache[AfterQuery] cannot marshal cache for sql: %s, not cached", sql)
+			cacheBytes, err := json.Marshal(db.Statement.Dest)
+			if err != nil {
+				s := fmt.Sprintf("chcache[AfterQuery] cannot marshal cache for sql: %s, not cached", sql)
+				fmt.Println(s)
+				return
+			}
+			err = cache.SetSearchCache(ctx, fmt.Sprintf("%d|", db.RowsAffected)+string(cacheBytes), tableName, sql, vars...)
+			if err != nil {
+				s := fmt.Sprintf("chcache[AfterQuery] set search cache for sql: %s error: %v", sql, err)
+				fmt.Println(s)
+				return
+			}
+
+			s = fmt.Sprintf("chcache[AfterQuery] sql %s cached", sql)
 			fmt.Println(s)
+		}
+		if errors.Is(db.Error, errors.New("search cache hit")) {
+			// search cache hit
+			db.Error = nil
 			return
 		}
-		err = cache.SetSearchCache(ctx, fmt.Sprintf("%d|", db.RowsAffected)+string(cacheBytes), tableName, sql, vars...)
-		if err != nil {
-			s := fmt.Sprintf("chcache[AfterQuery] set search cache for sql: %s error: %v", sql, err)
-			fmt.Println(s)
-			return
-		}
-
-		s = fmt.Sprintf("chcache[AfterQuery] sql %s cached", sql)
-		fmt.Println(s)
 	}
 }
 

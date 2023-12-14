@@ -1,6 +1,9 @@
 package cache
 
-import "github.com/ccever1/ch-cache/config"
+import (
+	"github.com/ccever1/ch-cache/config"
+	"github.com/go-redis/redis/v8"
+)
 
 func NewChCache(cacheConfig *config.CacheConfig) (*ChCache, error) {
 	cache := &ChCache{
@@ -8,4 +11,9 @@ func NewChCache(cacheConfig *config.CacheConfig) (*ChCache, error) {
 	}
 	err := cache.Init()
 	return cache, err
+}
+func NewRedisConfigWithClient(client *redis.Client) *config.RedisConfig {
+	return &config.RedisConfig{
+		Client: client,
+	}
 }

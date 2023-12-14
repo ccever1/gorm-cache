@@ -14,6 +14,7 @@ func NewChCache(cacheConfig *config.CacheConfig) (*ChCache, error) {
 }
 func NewRedisConfigWithClient(client *redis.Client) *config.RedisConfig {
 	return &config.RedisConfig{
+		Mode:   config.RedisConfigModeRaw,
 		Client: client,
 	}
 }

@@ -6,7 +6,15 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
+type RedisConfigMode int
+
+const (
+	RedisConfigModeOptions RedisConfigMode = 0
+	RedisConfigModeRaw     RedisConfigMode = 1
+)
+
 type RedisConfig struct {
+	Mode    RedisConfigMode
 	Options *redis.Options
 	Client  *redis.Client
 
@@ -15,7 +23,9 @@ type RedisConfig struct {
 
 func (c *RedisConfig) InitClient() *redis.Client {
 	c.once.Do(func() {
-		c.Client = redis.NewClient(c.Options)
+		if c.Mode == RedisConfigModeOptions {
+			c.Client = redis.NewClient(c.Options)
+		}
 	})
 	return c.Client
 }

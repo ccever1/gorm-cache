@@ -17,8 +17,11 @@ type RedisLayer struct {
 }
 
 func (r *RedisLayer) Init(conf *config.CacheConfig, prefix string) error {
-
-	r.client = redis.NewClient(conf.RedisConfig.Options)
+	if conf.RedisConfig.Mode == config.RedisConfigModeOptions {
+		r.client = redis.NewClient(conf.RedisConfig.Options)
+	} else {
+		r.client = conf.RedisConfig.Client
+	}
 	r.ttl = conf.CacheTTL
 	r.logger = conf.DebugLogger
 	r.logger.SetIsDebug(conf.DebugMode)

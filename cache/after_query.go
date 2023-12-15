@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ccever1/ch-cache/util"
+	"github.com/ccever1/gorm-cache/util"
 	"gorm.io/gorm"
 )
 

@@ -1,4 +1,4 @@
-module github.com/ccever1/ch-cache
+module github.com/ccever1/gorm-cache
 
 go 1.18
 

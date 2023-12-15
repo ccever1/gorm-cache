@@ -3,8 +3,8 @@ package data_layer
 import (
 	"context"
 
-	"github.com/ccever1/ch-cache/config"
-	"github.com/ccever1/ch-cache/util"
+	"github.com/ccever1/gorm-cache/config"
+	"github.com/ccever1/gorm-cache/util"
 )
 
 type DataLayerInterface interface {

@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ccever1/ch-cache/util"
+	"github.com/ccever1/gorm-cache/util"
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 	"gorm.io/gorm/callbacks"

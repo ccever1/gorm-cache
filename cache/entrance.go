@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"github.com/ccever1/ch-cache/config"
+	"github.com/ccever1/gorm-cache/config"
 	"github.com/go-redis/redis/v8"
 )
 

@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm/callbacks"
 )
 
-func BeforeQuery(cache *ChCache) func(db *gorm.DB) {
+func BeforeQuery(cache *GormCache) func(db *gorm.DB) {
 	return func(db *gorm.DB) {
 
 		isC, ok := db.InstanceGet("gorm:" + util.GormCachePrefix + ":iscache")
@@ -32,7 +32,7 @@ func BeforeQuery(cache *ChCache) func(db *gorm.DB) {
 		sql := db.Statement.SQL.String()
 		db.InstanceSet("gorm:"+util.GormCachePrefix+":sql", sql)
 		db.InstanceSet("gorm:"+util.GormCachePrefix+":vars", db.Statement.Vars)
-		//fmt.Println("ChCache BeforeQuery")
+		//fmt.Println("GormCache BeforeQuery")
 
 		cacheValue, err := cache.GetSearchCache(ctx, tableName, sql, db.Statement.Vars...)
 		if err != nil {

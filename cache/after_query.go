@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func AfterQuery(cache *ChCache) func(db *gorm.DB) {
+func AfterQuery(cache *GormCache) func(db *gorm.DB) {
 	return func(db *gorm.DB) {
 		isC, ok := db.InstanceGet("gorm:" + util.GormCachePrefix + ":iscache")
 		if !ok || !isC.(bool) {

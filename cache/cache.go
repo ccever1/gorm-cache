@@ -9,18 +9,18 @@ import (
 	"gorm.io/gorm"
 )
 
-type ChCache struct {
+type GormCache struct {
 	Config     *config.CacheConfig
 	Logger     config.LoggerInterface
 	InstanceId string
 	cache      data_layer.DataLayerInterface
 }
 
-func (c *ChCache) Name() string {
+func (c *GormCache) Name() string {
 	return util.GormCachePrefix
 }
 
-func (c *ChCache) Initialize(db *gorm.DB) (err error) {
+func (c *GormCache) Initialize(db *gorm.DB) (err error) {
 	err = db.Callback().Query().Before("gorm:query").Register("gorm:"+util.GormCachePrefix+":before_query", BeforeQuery(c))
 	if err != nil {
 		return err
@@ -29,11 +29,11 @@ func (c *ChCache) Initialize(db *gorm.DB) (err error) {
 	if err != nil {
 		return err
 	}
-	//fmt.Println("ChCache Initialize")
+	//fmt.Println("GormCache Initialize")
 	return
 }
 
-func (c *ChCache) Init() error {
+func (c *GormCache) Init() error {
 	if c.Config.RedisConfig == nil {
 		panic("please init redis config!")
 	}
@@ -55,7 +55,7 @@ func (c *ChCache) Init() error {
 	return nil
 }
 
-func (c *ChCache) SetSearchCache(ctx context.Context, cacheValue string, tableName string,
+func (c *GormCache) SetSearchCache(ctx context.Context, cacheValue string, tableName string,
 	sql string, vars ...interface{}) error {
 	key := util.GenSearchCacheKey(c.InstanceId, tableName, sql, vars...)
 	return c.cache.SetKey(ctx, util.Kv{
@@ -64,7 +64,7 @@ func (c *ChCache) SetSearchCache(ctx context.Context, cacheValue string, tableNa
 	})
 }
 
-func (c *ChCache) GetSearchCache(ctx context.Context, tableName string, sql string, vars ...interface{}) (string, error) {
+func (c *GormCache) GetSearchCache(ctx context.Context, tableName string, sql string, vars ...interface{}) (string, error) {
 	key := util.GenSearchCacheKey(c.InstanceId, tableName, sql, vars...)
 	return c.cache.GetValue(ctx, key)
 }

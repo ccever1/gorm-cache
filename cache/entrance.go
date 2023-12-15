@@ -5,8 +5,8 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-func NewChCache(cacheConfig *config.CacheConfig) (*ChCache, error) {
-	cache := &ChCache{
+func NewGormCache(cacheConfig *config.CacheConfig) (*GormCache, error) {
+	cache := &GormCache{
 		Config: cacheConfig,
 	}
 	err := cache.Init()

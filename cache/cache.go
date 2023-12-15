@@ -3,9 +3,9 @@ package cache
 import (
 	"context"
 
-	"github.com/ccever1/ch-cache/config"
-	"github.com/ccever1/ch-cache/data_layer"
-	"github.com/ccever1/ch-cache/util"
+	"github.com/ccever1/gorm-cache/config"
+	"github.com/ccever1/gorm-cache/data_layer"
+	"github.com/ccever1/gorm-cache/util"
 	"gorm.io/gorm"
 )
 

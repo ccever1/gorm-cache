@@ -9,8 +9,11 @@ Redis, where cached data stores in Redis (if you have multiple servers running t
 # Overview
 
 即插即用
+
 旁路缓存
+
 数据源使用 Redis
+
 会话级缓存
 
 # Install

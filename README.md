@@ -2,7 +2,7 @@
 
 # gorm-cache
 
-`gorm-cache` aims to provide a look-aside, almost-no-code-modification cache solution for gorm v2 users. It only applys to situations where database table has only one single primary key.
+`gorm-cache` aims to provide a look-aside, almost-no-code-modification cache solution for gorm v2 users.
 
 Redis, where cached data stores in Redis (if you have multiple servers running the same procedure, they don't share the same space in Redis)
 

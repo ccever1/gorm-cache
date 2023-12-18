@@ -38,7 +38,7 @@ func main() {
 	//More options in `config.config.go`
 	db.Use(cache) // use gorm plugin
 
-	var users []FaUser
+	var users []User
 
 	dbx := db.Where("maxsuccessions > ?", 16).Session(&gorm.Session{})
 
@@ -51,13 +51,13 @@ func main() {
 }
 
 
-type FaUser struct {
+type User struct {
 	ID             int    `gorm:"column:id;primary_key;AUTO_INCREMENT" json:"id"`                                                // ID
 	Maxsuccessions int    `gorm:"column:maxsuccessions;type:int(10);default:1;NOT NULL;comment:Maximum consecutive login days;" json:"maxsuccessions"` // 
 	RealName       string `gorm:"column:real_name;comment:real name;size:50;" json:"real_name"`                                       // 
 }
 
-func (m *FaUser) TableName() string {
+func (m *User) TableName() string {
 	return "fa_user"
 }
 

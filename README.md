@@ -1,0 +1,65 @@
+[![Apache-2.0 license](https://img.shields.io/badge/license-Apache2.0-brightgreen.svg)](https://opensource.org/licenses/Apache-2.0)
+
+# gorm-cache
+
+`gorm-cache` aims to provide a look-aside, almost-no-code-modification cache solution for gorm v2 users. It only applys to situations where database table has only one single primary key.
+
+Redis, where cached data stores in Redis (if you have multiple servers running the same procedure, they don't share the same space in Redis)
+
+## Usage
+
+```go
+package main
+
+import (
+	"github.com/ccever1/gorm-cache/cache"
+	"github.com/ccever1/gorm-cache/config"
+	"github.com/ccever1/gorm-cache/util"
+	"github.com/go-redis/redis/v8"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+)
+
+func main() {
+	dsn := "user:pass@tcp(127.0.0.1:3306)/database_name?charset=utf8mb4"
+	lg := logger.Default.LogMode(logger.Info)
+	db, _ := gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: lg})
+
+	redisClient := redis.NewClient(&redis.Options{
+		DB:   2,
+		Addr: "localhost:6379",
+	})
+
+	cache, _ := cache.NewGormCache(&config.CacheConfig{
+		RedisConfig: cache.NewRedisConfigWithClient(redisClient),
+		DebugMode:   true,
+	})
+	//More options in `config.config.go`
+	db.Use(cache) // use gorm plugin
+
+	var users []FaUser
+
+	dbx := db.Where("maxsuccessions > ?", 16).Session(&gorm.Session{})
+
+	dbx.InstanceSet(util.GormCacheTTL, 5000).Find(&users) // search cache not hit, objects cached
+
+	dbx.InstanceSet(util.GormCacheTTL, 5000).Find(&users) // search cache hit
+
+	dbx.Find(&users) // do not use cache
+
+}
+
+// 会员表
+type FaUser struct {
+	ID             int    `gorm:"column:id;primary_key;AUTO_INCREMENT" json:"id"`                                                // ID
+	Maxsuccessions int    `gorm:"column:maxsuccessions;type:int(10);default:1;NOT NULL;comment:最大连续登录天数;" json:"maxsuccessions"` // 最大连续登录天数
+	RealName       string `gorm:"column:real_name;comment:真实姓名;size:50;" json:"real_name"`                                       // 真实姓名
+}
+
+func (m *FaUser) TableName() string {
+	return "fa_user"
+}
+
+```
+

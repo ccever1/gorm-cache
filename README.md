@@ -42,7 +42,7 @@ func main() {
 
 	dbx := db.Where("maxsuccessions > ?", 16).Session(&gorm.Session{})
 
-	dbx.InstanceSet(util.GormCacheTTL, 5000).Find(&users) // search cache not hit, objects cached
+	dbx.InstanceSet(util.GormCacheTTL, 5000).Find(&users) // search cache not hit, objects cached, 5000ms
 
 	dbx.InstanceSet(util.GormCacheTTL, 5000).Find(&users) // search cache hit
 

@@ -50,11 +50,11 @@ func main() {
 
 }
 
-// 会员表
+
 type FaUser struct {
 	ID             int    `gorm:"column:id;primary_key;AUTO_INCREMENT" json:"id"`                                                // ID
-	Maxsuccessions int    `gorm:"column:maxsuccessions;type:int(10);default:1;NOT NULL;comment:最大连续登录天数;" json:"maxsuccessions"` // 最大连续登录天数
-	RealName       string `gorm:"column:real_name;comment:真实姓名;size:50;" json:"real_name"`                                       // 真实姓名
+	Maxsuccessions int    `gorm:"column:maxsuccessions;type:int(10);default:1;NOT NULL;comment:Maximum consecutive login days;" json:"maxsuccessions"` // 
+	RealName       string `gorm:"column:real_name;comment:real name;size:50;" json:"real_name"`                                       // 
 }
 
 func (m *FaUser) TableName() string {

@@ -16,6 +16,8 @@ Redis, where cached data stores in Redis (if you have multiple servers running t
 
 会话级缓存
 
+基于 Pacific73/gorm-cache 修改
+
 # Install
 
 go get github.com/ccever1/gorm-cache

@@ -11,7 +11,6 @@ import (
 
 type RedisLayer struct {
 	client    *redis.Client
-	ttl       int64
 	logger    config.LoggerInterface
 	keyPrefix string
 }
@@ -22,7 +21,6 @@ func (r *RedisLayer) Init(conf *config.CacheConfig, prefix string) error {
 	} else {
 		r.client = conf.RedisConfig.Client
 	}
-	r.ttl = conf.CacheTTL
 	r.logger = conf.DebugLogger
 	r.logger.SetIsDebug(conf.DebugMode)
 	r.keyPrefix = prefix
@@ -33,5 +31,6 @@ func (r *RedisLayer) GetValue(ctx context.Context, key string) (string, error) {
 }
 
 func (r *RedisLayer) SetKey(ctx context.Context, kv util.Kv) error {
-	return r.client.Set(ctx, kv.Key, kv.Value, time.Duration(util.RandFloatingInt64(r.ttl))*time.Millisecond).Err()
+	ttl := kv.TTL
+	return r.client.Set(ctx, kv.Key, kv.Value, time.Duration(util.RandFloatingInt64(ttl))*time.Millisecond).Err()
 }

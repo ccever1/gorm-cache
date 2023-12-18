@@ -11,11 +11,13 @@ import (
 
 func AfterQuery(cache *GormCache) func(db *gorm.DB) {
 	return func(db *gorm.DB) {
-		isC, ok := db.InstanceGet("gorm:" + util.GormCachePrefix + ":iscache")
-		if !ok || !isC.(bool) {
+		ttlInstance, _ := db.InstanceGet(util.GormCacheTTL)
+		ttl := util.GetTTL(ttlInstance)
+		if ttl <= 0 {
 			db.Error = nil
 			return
 		}
+
 		// s, _ := db.InstanceGet("gorm:"+util.GormCachePrefix+":sql")
 		tableName := ""
 		if db.Statement.Schema != nil {
@@ -36,7 +38,7 @@ func AfterQuery(cache *GormCache) func(db *gorm.DB) {
 				return
 			}
 			cache.Logger.CtxInfo(ctx, "[AfterQuery] set cache: %v", string(cacheBytes))
-			err = cache.SetSearchCache(ctx, fmt.Sprintf("%d|", db.RowsAffected)+string(cacheBytes), tableName, sql, vars...)
+			err = cache.SetSearchCache(ctx, fmt.Sprintf("%d|", db.RowsAffected)+string(cacheBytes), ttl, tableName, sql, vars...)
 			if err != nil {
 				cache.Logger.CtxError(ctx, "[AfterQuery] set search cache for sql: %s error: %v", sql, err)
 				return

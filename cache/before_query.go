@@ -15,8 +15,9 @@ import (
 func BeforeQuery(cache *GormCache) func(db *gorm.DB) {
 	return func(db *gorm.DB) {
 
-		isC, ok := db.InstanceGet("gorm:" + util.GormCachePrefix + ":iscache")
-		if !ok || !isC.(bool) {
+		ttlInstance, _ := db.InstanceGet(util.GormCacheTTL)
+		ttl := util.GetTTL(ttlInstance)
+		if ttl <= 0 {
 			db.Error = nil
 			return
 		}

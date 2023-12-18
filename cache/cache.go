@@ -55,12 +55,13 @@ func (c *GormCache) Init() error {
 	return nil
 }
 
-func (c *GormCache) SetSearchCache(ctx context.Context, cacheValue string, tableName string,
+func (c *GormCache) SetSearchCache(ctx context.Context, cacheValue string, ttl int64, tableName string,
 	sql string, vars ...interface{}) error {
 	key := util.GenSearchCacheKey(c.InstanceId, tableName, sql, vars...)
 	return c.cache.SetKey(ctx, util.Kv{
 		Key:   key,
 		Value: cacheValue,
+		TTL:   ttl,
 	})
 }
 

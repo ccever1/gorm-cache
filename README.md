@@ -3,6 +3,7 @@
 # gorm-cache
 
 `gorm-cache` aims to provide a look-aside, almost-no-code-modification cache solution for gorm v2 users.
+
 `gorm-cache` 是gorm的缓存中间件，在需要缓存的地方使用InstanceSet即可使用缓存。
 
 Redis, where cached data stores in Redis (if you have multiple servers running the same procedure, they don't share the same space in Redis)
